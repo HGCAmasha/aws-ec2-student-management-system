@@ -1,0 +1,46 @@
+
+
+
+    
+  
+<?php
+session_start();
+if (empty($_SESSION['csrf_token'])) { $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); }
+require_once 'db.php';
+$result = mysqli_query($conn, 'SELECT id, name, email, course FROM students ORDER BY id DESC');
+if (!$result) { http_response_code(500); exit('Unable to load students.'); }
+$students = mysqli_fetch_all($result, MYSQLI_ASSOC);
+$total = count($students);
+function e($value) { return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8'); }
+?>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudentHub | Student Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#19224a;--muted:#76809c;--purple:#6b4ef7;--blue:#357bf4;--bg:#f4f6fd}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--ink)}.shell{max-width:1160px;margin:auto;padding:32px 22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:28px}.brand{font-weight:800;font-size:23px;letter-spacing:-1px}.brand span{color:var(--purple)}.tag{background:white;border:1px solid #e6e9f5;padding:10px 16px;border-radius:30px;font-size:13px;color:var(--muted)}.hero{background:linear-gradient(115deg,#6945e9,#4089fb);color:white;padding:38px;border-radius:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;box-shadow:0 16px 35px #554de52b}.hero h1{font-size:clamp(25px,4vw,39px);margin:0 0 12px;letter-spacing:-1.4px}.hero p{opacity:.9;margin:0;line-height:1.6}.hero .symbol{font-size:75px;opacity:.8}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0}.stat{background:white;padding:23px;border-radius:18px;border:1px solid #e9ecf7}.stat small{color:var(--muted);font-weight:600}.stat strong{display:block;font-size:30px;margin-top:9px}.stat:nth-child(1){border-left:5px solid #7758fa}.stat:nth-child(2){border-left:5px solid #2ec9a6}.stat:nth-child(3){border-left:5px solid #ffb84d}.panel{background:white;border-radius:20px;padding:26px;border:1px solid #e9ecf7}.heading{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:20px}.heading h2{font-size:21px;margin:0}.heading p{color:var(--muted);font-size:13px;margin:7px 0 0}.actions{display:flex;gap:10px;flex-wrap:wrap}input[type=search]{border:1px solid #dfe4f2;border-radius:11px;padding:12px 14px;font:inherit;min-width:220px;outline:none}input:focus{border-color:#7658ff;box-shadow:0 0 0 3px #7658ff1a}.btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 15px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}.primary{background:var(--purple);color:white}.edit{background:#e8f0ff;color:#2b67d4}.delete{background:#ffe8ec;color:#d8405e}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;min-width:670px}th{background:#f7f8fd;color:#75809a;font-size:12px;text-transform:uppercase;letter-spacing:.7px;padding:17px 15px}td{padding:17px 15px;border-bottom:1px solid #edf0f7;font-size:14px}tr:last-child td{border-bottom:0}.person{display:flex;align-items:center;gap:11px;font-weight:700}.avatar{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:#eae4ff;color:#6945e9;font-weight:800}.course{background:#e6f8f4;color:#149879;padding:7px 10px;border-radius:20px;font-size:12px;font-weight:700}.rowactions{display:flex;gap:7px}.empty{text-align:center;padding:35px;color:var(--muted)}.footer{text-align:center;color:#9aa2b8;font-size:12px;padding:26px}@media(max-width:650px){.shell{padding:18px 12px}.hero{padding:25px}.hero .symbol{display:none}.stats{grid-template-columns:1fr}.panel{padding:16px}.actions,input[type=search]{width:100%}.actions .btn{flex:1}}
+
+/* Custom delete confirmation dialog */
+.modal{border:0;border-radius:24px;padding:0;width:min(420px,calc(100% - 30px));box-shadow:0 30px 90px #18244a50;overflow:hidden}.modal::backdrop{background:#111b3c99;backdrop-filter:blur(5px)}.modal-inner{padding:32px;text-align:center}.modal-icon{width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,#ffe0e8,#fff0f2);display:grid;place-items:center;margin:0 auto 18px;font-size:32px}.modal h3{font-size:24px;margin:0 0 10px;color:#19224a}.modal p{font-size:14px;line-height:1.65;color:#75809a;margin:0 0 24px}.modal-actions{display:flex;gap:10px}.modal-actions button{flex:1;border:0;border-radius:12px;padding:14px 12px;font:700 13px Inter,Arial,sans-serif;cursor:pointer}.cancel-btn{background:#eef0f8;color:#384263}.confirm-btn{background:linear-gradient(110deg,#fa5d75,#e6335a);color:white;box-shadow:0 8px 18px #e6335a35}.modal-actions button:focus-visible{outline:3px solid #7658ff;outline-offset:3px}
+</style>
+</head>
+<body><main class="shell">
+<header class="top"><div class="brand">🎓 Student<span>Hub</span></div><div class="tag">☁ AWS EC2 • PHP + MySQL</div></header>
+<section class="hero"><div><h1>Student Management<br>Made Simple ✨</h1><p>Manage student records in one beautiful, organized workspace.</p></div><div class="symbol" aria-hidden="true">📚</div></section>
+<section class="stats"><div class="stat"><small>👥 Total Students</small><strong><?= $total ?></strong></div><div class="stat"><small>📘 Courses</small><strong><?= count(array_unique(array_column($students, 'course'))) ?></strong></div><div class="stat"><small>⚡ System Status</small><strong style="font-size:21px;color:#159d80">Active</strong></div></section>
+<section class="panel"><div class="heading"><div><h2>Student Directory</h2><p>Browse, search, and manage your students.</p></div><div class="actions"><input type="search" id="search" placeholder="🔎 Search students..." aria-label="Search students"><a class="btn primary" href="create.php">+ Add Student</a></div></div>
+<div class="tablewrap"><table><thead><tr><th>ID</th><th>Student</th><th>Email</th><th>Course</th><th>Actions</th></tr></thead><tbody id="studentRows">
+<?php foreach($students as $student): ?><tr><td>#<?= (int)$student['id'] ?></td><td><div class="person"><span class="avatar"><?= e(strtoupper(substr($student['name'],0,1))) ?></span><?= e($student['name']) ?></div></td><td><?= e($student['email']) ?></td><td><span class="course"><?= e($student['course']) ?></span></td><td><div class="rowactions"><a class="btn edit" href="edit.php?id=<?= (int)$student['id'] ?>">Edit</a><button type="button" class="btn delete" style="border:0;cursor:pointer;font-family:inherit" data-delete-id="<?= (int)$student['id'] ?>" data-delete-name="<?= e($student['name']) ?>">Delete</button></div></td></tr><?php endforeach; ?>
+<?php if (!$students): ?><tr><td colspan="5" class="empty">No students yet. Click Add Student to get started.</td></tr><?php endif; ?>
+</tbody></table></div><p class="empty" id="noMatches" hidden>No matching students found.</p></section><div class="footer">StudentHub • Built with PHP, MySQL & AWS EC2</div></main>
+<dialog id="deleteDialog" class="modal" aria-labelledby="deleteTitle" aria-describedby="deleteDescription"><div class="modal-inner"><div class="modal-icon" aria-hidden="true">🗑️</div><h3 id="deleteTitle">Delete Student?</h3><p id="deleteDescription">Are you sure you want to delete <strong id="deleteStudentName"></strong>? This action cannot be undone.</p><form id="deleteForm" method="post" action="delete.php"><input type="hidden" name="id" id="deleteStudentId"><input type="hidden" name="csrf_token" value="<?= e($_SESSION['csrf_token']) ?>"><div class="modal-actions"><button type="button" class="cancel-btn" id="cancelDelete">Cancel</button><button type="submit" class="confirm-btn">Yes, Delete Student</button></div></form></div></dialog>
+<script>
+const dialog=document.getElementById('deleteDialog');
+document.querySelectorAll('[data-delete-id]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('deleteStudentId').value=button.dataset.deleteId;document.getElementById('deleteStudentName').textContent=button.dataset.deleteName;dialog.showModal();}));
+document.getElementById('cancelDelete').addEventListener('click',()=>dialog.close());
+const search=document.getElementById('search');const rows=[...document.querySelectorAll('#studentRows tr')].filter(r=>!r.querySelector('.empty'));search.addEventListener('input',()=>{let shown=0;for(const row of rows){const visible=row.textContent.toLowerCase().includes(search.value.toLowerCase().trim());row.hidden=!visible;if(visible)shown++;}document.getElementById('noMatches').hidden=shown!==0||rows.length===0;});</script>
+</body></html>
+

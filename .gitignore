@@ -1,0 +1,11 @@
+# Secrets
+*.pem
+*.key
+.env
+.env.*
+db.php
+
+# Backups
+*.bak
+*.save
+*.sql~
