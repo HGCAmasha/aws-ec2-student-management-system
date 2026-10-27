@@ -83,3 +83,21 @@ aws-ec2-student-management-system/
 - MySQL database configuration
 - Secure remote access using SSH and SCP
 - Hosting a database-driven application in the cloud
+
+
+## Database Setup
+
+1. Install Apache, PHP, and MySQL.
+2. Create a MySQL database named `studentapp`.
+3. Import the database schema from `database/schema.sql`.
+4. Copy `src/db.example.php` to `src/db.php`.
+5. Open `src/db.php` and replace the placeholder values with your own MySQL credentials.
+6. Place the PHP application files in your Apache web directory.
+7. Start Apache and MySQL, then open `index.php` in your browser.
+
+### Security Notes
+
+- Never commit `db.php` containing real database credentials.
+- Never upload AWS `.pem` private key files.
+- Use sample student records for demonstrations.
+- This is an educational project. Authentication and additional security controls are required before deploying it as a public application.
